@@ -1,0 +1,14 @@
+export 'splashscreen/splash.screen.dart';
+export 'login/login.screen.dart';
+export 'home/home.screen.dart';
+export 'crearcliente/crearcliente.screen.dart';
+export 'clientesvisor/clientesvisor.screen.dart';
+export 'actualizarcliente/actualizarcliente.screen.dart';
+export 'crearfactura/crearfactura.scree.dart';
+export 'filtrofacturas/filtrofactura.screen.dart';
+export 'facturasvisor/facturavisor.screen.dart';
+export 'facturasvisorcliente/facturavisor.screen.dart';
+export 'actualizarfactura/actualizarfactura.screen.dart';
+export 'setting/setting.screen.dart';
+export 'actualizarusuario/actualizarusuario.screen.dart';
+export 'backup/backup.screen.dart';
