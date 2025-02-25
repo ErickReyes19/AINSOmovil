@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:accesorios_industriales_sosa/models/models.dart';
+import 'package:ainso/models/models.dart';
 import 'package:http/http.dart' as http;
 
 import 'services.dart';

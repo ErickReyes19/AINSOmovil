@@ -1,7 +1,7 @@
-import 'package:accesorios_industriales_sosa/models/models.dart';
-import 'package:accesorios_industriales_sosa/screens/home/home.screen.dart';
-import 'package:accesorios_industriales_sosa/screens/login/login.screen.dart';
-import 'package:accesorios_industriales_sosa/services/services.dart';
+import 'package:ainso/models/models.dart';
+import 'package:ainso/screens/home/home.screen.dart';
+import 'package:ainso/screens/login/login.screen.dart';
+import 'package:ainso/services/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';

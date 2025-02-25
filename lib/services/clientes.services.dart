@@ -1,6 +1,6 @@
 // ignore_for_file: avoid_print
 
-import 'package:accesorios_industriales_sosa/services/services.dart';
+import 'package:ainso/services/services.dart';
 
 import '../models/models.dart';
 

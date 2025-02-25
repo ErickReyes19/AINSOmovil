@@ -1,6 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:accesorios_industriales_sosa/controllers/facturas.controller.dart';
+import 'package:ainso/controllers/facturas.controller.dart';
 import 'package:flutter/material.dart';
 
 import 'package:google_fonts/google_fonts.dart';

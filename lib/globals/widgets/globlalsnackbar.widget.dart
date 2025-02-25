@@ -1,4 +1,4 @@
-import 'package:accesorios_industriales_sosa/cosntans.dart';
+import 'package:ainso/cosntans.dart';
 import 'package:flutter/material.dart';
 
 

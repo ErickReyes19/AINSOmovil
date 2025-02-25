@@ -1,6 +1,5 @@
-import 'package:accesorios_industriales_sosa/controllers/backup.controller.dart';
+import 'package:ainso/controllers/backup.controller.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class BackupScreen extends StatelessWidget {
   const BackupScreen({super.key});
@@ -11,7 +10,7 @@ class BackupScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Backup & Restore"),
+        title: const Text("Copia y respaldo"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -21,7 +20,7 @@ class BackupScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Text(
-                'Backup & Restore Options',
+                'Opciones de copia y respaldo',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 40),
@@ -29,12 +28,7 @@ class BackupScreen extends StatelessWidget {
               // Botón para generar un backup
               ElevatedButton.icon(
                 onPressed: () async {
-                  bool result = await backupController.crearBackup(context);
-                  if (result) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Backup generado con éxito.")),
-                    );
-                  }
+                  await backupController.crearBackup(context);
                 },
                 icon: const Icon(Icons.cloud_upload),
                 label: const Text("Generar Backup"),
@@ -52,13 +46,9 @@ class BackupScreen extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: () async {
                   // Aquí debes implementar un picker para seleccionar el archivo de backup
-                  String backupPath = "/data/user/0/com.example.accesorios_industriales_sosa/app_flutter/ais.db"; // Reemplázalo con la lógica real
-                  bool result = await backupController.restaurarBackup(backupPath, context);
-                  if (result) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Backup restaurado con éxito.")),
-                    );
-                  }
+                  String backupPath = "/data/user/0/com.ainso.ainso/app_flutter/ais.db"; // Reemplázalo con la lógica real
+                  await backupController.restaurarBackup(backupPath, context);
+
                 },
                 icon: const Icon(Icons.cloud_download),
                 label: const Text("Importar Backup"),

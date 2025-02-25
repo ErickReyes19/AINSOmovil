@@ -1,8 +1,8 @@
 // ignore_for_file: empty_catches, avoid_print, depend_on_referenced_packages
-import 'package:accesorios_industriales_sosa/providers/backup.provider.dart';
+import 'package:ainso/providers/backup.provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:accesorios_industriales_sosa/cosntans.dart';
-import 'package:accesorios_industriales_sosa/screens/screens.dart';
+import 'package:ainso/cosntans.dart';
+import 'package:ainso/screens/screens.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -79,7 +79,7 @@ class MyApp extends StatelessWidget {
             onSurfaceVariant: Color(0xFF666666), // Texto secundario gris oscuro
           ),
         ),
-        title: 'Material App',
+        title: 'Ainso',
         home: const HomeScreen(),
       ),
     );

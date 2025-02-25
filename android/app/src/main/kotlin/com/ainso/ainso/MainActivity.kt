@@ -1,4 +1,4 @@
-package com.example.accesorios_industriales_sosa
+package com.ainso.ainso
 
 import io.flutter.embedding.android.FlutterActivity
 

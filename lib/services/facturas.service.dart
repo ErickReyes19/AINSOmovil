@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_print
 
-import 'package:accesorios_industriales_sosa/models/factura.model.dart';
-import 'package:accesorios_industriales_sosa/services/services.dart';
+import 'package:ainso/models/factura.model.dart';
+import 'package:ainso/services/services.dart';
 import 'package:intl/intl.dart';
 
 class FacturasLocalesService {

@@ -1,4 +1,4 @@
-import 'package:accesorios_industriales_sosa/models/factura.model.dart';
+import 'package:ainso/models/factura.model.dart';
 import 'package:flutter/material.dart';
 
 class FacturaProvider with ChangeNotifier {

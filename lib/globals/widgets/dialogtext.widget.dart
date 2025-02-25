@@ -1,6 +1,6 @@
 
-import 'package:accesorios_industriales_sosa/controllers/controller.dart';
-import 'package:accesorios_industriales_sosa/globals/widgets/textparrafo.widget.dart';
+import 'package:ainso/controllers/controller.dart';
+import 'package:ainso/globals/widgets/textparrafo.widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

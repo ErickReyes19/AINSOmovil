@@ -1,6 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:accesorios_industriales_sosa/controllers/clientes.controller.dart';
+import 'package:ainso/controllers/clientes.controller.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +9,8 @@ import '../../models/models.dart';
 import '../../providers/providers.dart';
 
 class CrearClienteScreen extends StatefulWidget {
-  const CrearClienteScreen({super.key});
+  final String titulo;
+  const CrearClienteScreen({super.key, required this.titulo});
 
   @override
   State<CrearClienteScreen> createState() => _CrearClienteScreenState();
@@ -37,7 +38,7 @@ class _CrearClienteScreenState extends State<CrearClienteScreen>
           Scaffold(
             appBar: customAppBar(
               tema: tema,
-              titulo: "Crear cliente",
+              titulo: widget.titulo,
               context: context,
             ),
             backgroundColor: tema.surface,
@@ -103,17 +104,22 @@ class _CrearClienteScreenState extends State<CrearClienteScreen>
                         nombre: txtNombreCliente.text,
                         estado: 1,
                         tipo:
-                            _selectedTipoCliente, // Asignamos el tipo seleccionado
+                            _selectedTipoCliente, 
                       );
 
-                      // Insertar cliente y actualizar el provider
                       ClientesLocalesController()
                           .insertarCliente(cliente, context)
                           .then((value) => clientesProvider.resetProvider())
-                          .then(
-                            (value) => ClientesLocalesController()
-                                .traerClientesLocalesCliente(context),
-                          )
+                          .then((value) {
+                            // Verificar el tipo de cliente y hacer la consulta correspondiente
+                            if (_selectedTipoCliente == 'Cliente') {
+                              return ClientesLocalesController()
+                                  .traerClientesLocalesCliente(context);
+                            } else {
+                              return ClientesLocalesController()
+                                  .traerClientesLocalesProveedor(context);
+                            }
+                          })
                           .then((value) => Navigator.pop(context));
                     },
                     texto: 'Crear cliente',

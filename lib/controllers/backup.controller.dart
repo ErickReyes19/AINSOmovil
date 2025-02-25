@@ -1,13 +1,13 @@
-import 'package:accesorios_industriales_sosa/globals/widgets/snackbarglobal.helper.global.dart';
-import 'package:accesorios_industriales_sosa/providers/backup.provider.dart';
-import 'package:accesorios_industriales_sosa/services/backup.service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ainso/providers/backup.provider.dart';
+import 'package:ainso/services/backup.service.dart';
+import 'package:ainso/globals/widgets/snackbarglobal.helper.global.dart';
 
 class BackupController {
   final BackupService _backupService = BackupService();
 
-  // Crear una copia de seguridad de la base de datos
+  // Crear un backup de la base de datos
   Future<bool> crearBackup(BuildContext context) async {
     final provider = Provider.of<BackupProvider>(context, listen: false);
     try {
@@ -26,7 +26,6 @@ class BackupController {
       }
     } catch (e) {
       provider.loading = false;
-      print("Error al crear el backup: $e");
       sncackbarGlobal('Error al crear el backup.', color: Colors.red);
       return false;
     }
@@ -39,7 +38,7 @@ class BackupController {
       provider.loading = true;
 
       // Llamar al servicio de restauración de backup
-      bool success = await _backupService.restaurarBackup(backupPath);
+      bool success = await _backupService.restaurarBackup();
       provider.loading = false;
 
       if (success) {
@@ -51,9 +50,13 @@ class BackupController {
       }
     } catch (e) {
       provider.loading = false;
-      print("Error al restaurar el backup: $e");
       sncackbarGlobal('Error al restaurar el backup.', color: Colors.red);
       return false;
     }
+  }
+
+  // Compartir la base de datos como backup
+  Future<void> compartirBackup(BuildContext context) async {
+    await _backupService.compartirBackup(context);
   }
 }

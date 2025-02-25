@@ -1,5 +1,5 @@
-import 'package:accesorios_industriales_sosa/models/factura.model.dart';
-import 'package:accesorios_industriales_sosa/providers/providers.dart';
+import 'package:ainso/models/factura.model.dart';
+import 'package:ainso/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
@@ -10,9 +10,7 @@ import '../../globals/widgets/widgets.dart';
 import 'components/cardfactura.component.dart';
 
 class FacturasVisorCliente extends StatefulWidget {
-  const FacturasVisorCliente({
-    super.key,
-  });
+  const FacturasVisorCliente({super.key});
   @override
   State<FacturasVisorCliente> createState() => _FacturasVisorClienteState();
 }
@@ -26,10 +24,16 @@ class _FacturasVisorClienteState extends State<FacturasVisorCliente> {
     return valor;
   }
 
+  final formatoLps = NumberFormat.currency(
+    locale: 'en_US',
+    symbol: 'LPS ',
+    decimalDigits: 2,
+  );
+
   @override
   void initState() {
     initializeDateFormatting('es_MX', null);
-    
+
     super.initState();
   }
 
@@ -41,69 +45,78 @@ class _FacturasVisorClienteState extends State<FacturasVisorCliente> {
     Size size = MediaQuery.of(context).size;
     final tema = Theme.of(context).colorScheme;
     return SafeArea(
-        child: Stack(
-      children: [
-        Scaffold(
-          backgroundColor: tema.surface,
-          body: Column(
-            children: [
-              AppBar(
-                
-                actions: [
-                  IconButton(
+      child: Stack(
+        children: [
+          Scaffold(
+            backgroundColor: tema.surface,
+            body: Column(
+              children: [
+                AppBar(
+                  actions: [
+                    IconButton(
                       onPressed: () {
                         if (facturaProvider.listFacturaOrdenadaFecha.isEmpty) {
-                          alertError(context,
-                              mensaje:
-                                  'Debe de tener facturas para poder exportarlas');
+                          alertError(
+                            context,
+                            mensaje:
+                                'Debe de tener facturas para poder exportarlas',
+                          );
                           return;
                         }
                         generateAndSharePdf(
-                            facturaProvider.listFacturaOrdenadaFecha,
-                            facturaProvider.listFacturaOrdenadaFecha[0].nombreCliente!,
-                            sumaCant(facturaProvider.listFacturaOrdenadaFecha));
+                          facturaProvider.listFacturaOrdenadaFecha,
+                          facturaProvider
+                              .listFacturaOrdenadaFecha[0]
+                              .nombreCliente!,
+                          sumaCant(facturaProvider.listFacturaOrdenadaFecha),
+                        );
                       },
-                      icon: Icon(
-                        Icons.ios_share,
-                        color: tema.primary,
-                      ))
-                ],
-                backgroundColor: tema.background,
-                elevation: 0,
-                leading: IconButton(
+                      icon: Icon(Icons.ios_share, color: tema.primary),
+                    ),
+                  ],
+                  backgroundColor: tema.surfaceBright,
+                  elevation: 0,
+                  leading: IconButton(
                     onPressed: () {
                       facturaProvider.resetProvider();
                       clientesProvider.resetProvider();
                       Navigator.pop(context);
                     },
-                    icon: Icon(
-                      Icons.arrow_back_ios,
-                      color: tema.primary,
-                    )),
-                titleSpacing: 0,
-                title:
-                    TextSecundario(texto: 'Facturas', colorTexto: tema.primary),
-              ),
-              facturaProvider.listFactura.isNotEmpty
-                  ? Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
+                    icon: Icon(Icons.arrow_back_ios, color: tema.primary),
+                  ),
+                  titleSpacing: 0,
+                  title: TextSecundario(
+                    texto: 'Facturas',
+                    colorTexto: tema.primary,
+                  ),
+                ),
+                facturaProvider.listFactura.isNotEmpty
+                    ? Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 15),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 15,
+                              ),
                               child: TextPrincipal(
-                                  texto: facturaProvider
-                                      .listFactura[0].nombreCliente!),
+                                texto:
+                                    facturaProvider
+                                        .listFactura[0]
+                                        .nombreCliente!,
+                              ),
                             ),
                             ListView.builder(
-                                shrinkWrap: true,
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: facturaProvider.listFactura.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return CardFactura(
-                                      factura: facturaProvider.listFactura[index]);
-                                }),
+                              shrinkWrap: true,
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: facturaProvider.listFactura.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return CardFactura(
+                                  factura: facturaProvider.listFactura[index],
+                                );
+                              },
+                            ),
                             Container(
                               color: tema.primary,
                               child: Padding(
@@ -112,9 +125,7 @@ class _FacturasVisorClienteState extends State<FacturasVisorCliente> {
                                   children: [
                                     Row(
                                       children: [
-                                        SizedBox(
-                                          width: size.width * 0.03,
-                                        ),
+                                        SizedBox(width: size.width * 0.03),
                                         Expanded(
                                           flex: 5,
                                           child: TextParrafo(
@@ -127,20 +138,23 @@ class _FacturasVisorClienteState extends State<FacturasVisorCliente> {
                                           flex: 5,
                                           child: Row(
                                             // Agregado un Row para alinear correctamente los textos
-                                            mainAxisAlignment: MainAxisAlignment
-                                                .end, // Alinear a la derecha
+                                            mainAxisAlignment:
+                                                MainAxisAlignment
+                                                    .end, // Alinear a la derecha
                                             children: [
                                               Expanded(
                                                 child: TextSecundario(
                                                   colorTexto: tema.onPrimary,
                                                   textAlign: TextAlign.right,
-                                                  texto: sumaCant(
-                                                      facturaProvider.listFactura).toString(),
+                                                  texto: formatoLps.format(
+                                                    sumaCant(
+                                                      facturaProvider
+                                                          .listFactura,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                              const SizedBox(
-                                                width: 20,
-                                              )
+                                              const SizedBox(width: 20),
                                             ],
                                           ),
                                         ),
@@ -152,17 +166,16 @@ class _FacturasVisorClienteState extends State<FacturasVisorCliente> {
                             ),
                           ],
                         ),
-                    ),
-                  )
-                  : NoDataWidget(
-                      tema: tema,
-                      size: size,
+                      ),
                     )
-            ],
+                    : NoDataWidget(tema: tema, size: size),
+              ],
+            ),
           ),
-        ),
-        if (facturaProvider.loading) CargandoWidget(size: size, conColor: true),
-      ],
-    ));
+          if (facturaProvider.loading)
+            CargandoWidget(size: size, conColor: true),
+        ],
+      ),
+    );
   }
 }

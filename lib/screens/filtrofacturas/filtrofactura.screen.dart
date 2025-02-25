@@ -1,8 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:accesorios_industriales_sosa/controllers/clientes.controller.dart';
-import 'package:accesorios_industriales_sosa/controllers/facturas.controller.dart';
-import 'package:accesorios_industriales_sosa/screens/screens.dart';
+import 'package:ainso/controllers/clientes.controller.dart';
+import 'package:ainso/controllers/facturas.controller.dart';
+import 'package:ainso/screens/screens.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';

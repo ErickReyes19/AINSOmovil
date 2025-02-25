@@ -1,5 +1,5 @@
-import 'package:accesorios_industriales_sosa/providers/auth.provider.dart';
-import 'package:accesorios_industriales_sosa/screens/screens.dart';
+import 'package:ainso/providers/auth.provider.dart';
+import 'package:ainso/screens/screens.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

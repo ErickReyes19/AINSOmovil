@@ -1,4 +1,4 @@
-import 'package:accesorios_industriales_sosa/controllers/clientes.controller.dart';
+import 'package:ainso/controllers/clientes.controller.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +11,7 @@ class ActualizarClienteScreen extends StatefulWidget {
   final bool estado;
   final int id;
   final String tipoCliente; // Agregamos tipoCliente
+  final String titulo; // Agregamos tipoCliente
 
   const ActualizarClienteScreen({
     super.key,
@@ -18,6 +19,7 @@ class ActualizarClienteScreen extends StatefulWidget {
     required this.estado,
     required this.id,
     required this.tipoCliente, // Añadimos tipoCliente
+    required this.titulo, // Añadimos tipoCliente
   });
 
   @override
@@ -50,7 +52,7 @@ class _ActualizarClienteScreenState extends State<ActualizarClienteScreen>
       children: [
         Scaffold(
           appBar: customAppBar(
-              tema: tema, titulo: "Actualizar Cliente", context: context),
+              tema: tema, titulo: widget.titulo, context: context),
           backgroundColor: tema.surface,
           body: Padding(
             padding: EdgeInsets.symmetric(horizontal: size.width * 0.02),
@@ -124,8 +126,16 @@ class _ActualizarClienteScreenState extends State<ActualizarClienteScreen>
 
                     ClientesLocalesController()
                         .actualizarCliente(cliente, context)
-                        .then((value) =>
-                            ClientesLocalesController().traerClientesLocalesCliente(context))
+                          .then((value) {
+                            // Verificar el tipo de cliente y hacer la consulta correspondiente
+                            if (_selectedTipoCliente == 'Cliente') {
+                              return ClientesLocalesController()
+                                  .traerClientesLocalesCliente(context);
+                            } else {
+                              return ClientesLocalesController()
+                                  .traerClientesLocalesProveedor(context);
+                            }
+                          })
                         .then((value) => Navigator.pop(context));
                   },
                   texto: 'Actualizar cliente',

@@ -1,5 +1,5 @@
-import 'package:accesorios_industriales_sosa/cosntans.dart';
-import 'package:accesorios_industriales_sosa/globals/widgets/dialogtext.widget.dart';
+import 'package:ainso/cosntans.dart';
+import 'package:ainso/globals/widgets/dialogtext.widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';

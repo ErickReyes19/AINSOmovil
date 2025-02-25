@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.accesorios_industriales_sosa"
+    namespace = "com.ainso.ainso"
     compileSdk = 34
     ndkVersion = "27.0.12077973"
     compileOptions {
@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.accesorios_industriales_sosa"
+        applicationId = "com.ainso.ainso"
         minSdk = 21
         targetSdk = 34
         versionCode = 1

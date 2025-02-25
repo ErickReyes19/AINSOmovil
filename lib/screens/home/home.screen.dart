@@ -1,5 +1,5 @@
-import 'package:accesorios_industriales_sosa/controllers/clientes.controller.dart';
-import 'package:accesorios_industriales_sosa/screens/screens.dart';
+import 'package:ainso/controllers/clientes.controller.dart';
+import 'package:ainso/screens/screens.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +19,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    Future.microtask(() {
+      final authprovider = Provider.of<AuthProvider>(context, listen: false);
+      if (authprovider.nombreUsuario.isEmpty) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      }
+    });
   }
 
   @override
@@ -26,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final tema = Theme.of(context).colorScheme;
     Size size = MediaQuery.of(context).size;
     final authprovider = Provider.of<AuthProvider>(context, listen: true);
+
     return Scaffold(
       backgroundColor: tema.surface,
       body: ListView(
@@ -115,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => const ClientesVisorScreen(),
+                                    builder: (_) => const ClientesVisorScreen(titulo: "Cliente",),
                                   ),
                                 );
                               },
@@ -133,9 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               icono: Icons.contact_support_outlined,
                               funcion: () {
                                 ClientesLocalesController()
-                                    .traerAllClientesLocales(
-                                      context,
-                                    );
+                                    .traerAllClientesLocales(context);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -157,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => const ClientesVisorScreen(),
+                                    builder: (_) => const ClientesVisorScreen(titulo: "Proveedor",),
                                   ),
                                 );
                               },
@@ -170,24 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     IntrinsicHeight(
                       child: Row(
                         children: [
-                          Expanded(
-                            child: GridItem(
-                              icono: Icons.contact_support_outlined,
-                              funcion: () {
-                                ClientesLocalesController()
-                                    .traerClientesActivosLocalesCliente(
-                                      context,
-                                    );
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const FiltroFacuraScreen(),
-                                  ),
-                                );
-                              },
-                              texto: 'Consultas',
-                            ),
-                          ),
+                          Expanded(child: Center()),
                           const SizedBox(width: 10),
                           Expanded(
                             child: GridItem(
