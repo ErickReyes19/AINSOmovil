@@ -1,4 +1,5 @@
 import 'package:ainso/controllers/clientes.controller.dart';
+import 'package:ainso/screens/crearcotizacion/crearcotizacion.screen.dart';
 import 'package:ainso/screens/screens.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -125,7 +126,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => const ClientesVisorScreen(titulo: "Cliente",),
+                                    builder:
+                                        (_) => const ClientesVisorScreen(
+                                          titulo: "Cliente",
+                                        ),
                                   ),
                                 );
                               },
@@ -165,7 +169,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => const ClientesVisorScreen(titulo: "Proveedor",),
+                                    builder:
+                                        (_) => const ClientesVisorScreen(
+                                          titulo: "Proveedor",
+                                        ),
                                   ),
                                 );
                               },
@@ -178,7 +185,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     IntrinsicHeight(
                       child: Row(
                         children: [
-                          Expanded(child: Center()),
+                          Expanded(
+                            child: GridItem(
+                              icono: Icons.event,
+                              funcion: () {
+                                ClientesLocalesController()
+                                    .traerClientesLocalesCliente(context);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => CrearCotizacionScreen(),
+                                  ),
+                                );
+                              },
+                              texto: 'Crear factura',
+                            ),
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: GridItem(

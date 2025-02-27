@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => ClientesProvider()),
         ChangeNotifierProvider(create: (context) => FacturaProvider()),
         ChangeNotifierProvider(create: (context) => BackupProvider()),
+        ChangeNotifierProvider(create: (context) => EmpresaProvider()),
       ],
       child: MaterialApp(
         localizationsDelegates: const [
@@ -79,7 +80,7 @@ class MyApp extends StatelessWidget {
             onSurfaceVariant: Color(0xFF666666), // Texto secundario gris oscuro
           ),
         ),
-        title: 'Ainso',
+        title: 'Ainsod',
         home: const HomeScreen(),
       ),
     );

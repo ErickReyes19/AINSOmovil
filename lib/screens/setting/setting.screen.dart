@@ -1,5 +1,7 @@
+import 'package:ainso/controllers/empresa.controller.dart';
 import 'package:ainso/providers/auth.provider.dart';
 import 'package:ainso/screens/screens.dart';
+import 'package:ainso/screens/verempresa/verEmpresa.screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -88,6 +90,29 @@ class _GridSettingsScreenState extends State<GridSettingsScreen> {
                               texto: 'Copia de seguridad',
                             ),
                           ),
+                        ],
+                      ),
+                    ),
+                    IntrinsicHeight(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GridItem(
+                              icono: Icons.home,
+                              funcion: () {
+                                EmpresaController().traerEmpresa(context);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const EmpresaVisorScreen(),
+                                  ),
+                                );
+                              },
+                              texto: 'Configuración de la empresa',
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(child: Container()),
                         ],
                       ),
                     ),

@@ -1,0 +1,31 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/empresa.provider.dart';
+import 'editar_empresa_screen.dart'; // Asegúrate de tener creada esta pantalla
+
+class EditEmpresaIconButton extends StatelessWidget {
+  const EditEmpresaIconButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.edit),
+      tooltip: 'Editar Empresa',
+      onPressed: () {
+        final empresa = Provider.of<EmpresaProvider>(context, listen: false).empresa;
+        if (empresa != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EditarEmpresaScreen(empresa: empresa),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No hay empresa para editar')),
+          );
+        }
+      },
+    );
+  }
+}
