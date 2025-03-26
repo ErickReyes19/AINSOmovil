@@ -32,9 +32,9 @@ class CotizacionClass {
     int idCotizacion;
     int idCliente;
     DateTime fecha;
-    int total;
-    int subtotal;
-    int isv;
+    double total;
+    double subtotal;
+    double isv;
     String numeroCotizacion;
     String tipoPago;
     String tipoCotizacion;

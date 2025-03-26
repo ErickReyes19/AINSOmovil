@@ -12,3 +12,4 @@ export 'actualizarfactura/actualizarfactura.screen.dart';
 export 'setting/setting.screen.dart';
 export 'actualizarusuario/actualizarusuario.screen.dart';
 export 'backup/backup.screen.dart';
+export 'filtroCotizacion/filtroCotizacion.screen.dart';

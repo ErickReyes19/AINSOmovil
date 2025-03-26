@@ -1,4 +1,6 @@
 
+import 'package:ainso/models/cotizacionCliente.model.dart';
+import 'package:ainso/models/cotizacionClienteReporte.model.dart';
 import 'package:ainso/providers/providers.dart';
 import 'package:ainso/services/services.dart';
 import 'package:flutter/material.dart';
@@ -10,35 +12,41 @@ class CotizacionController {
   final service = CotizacionService();
 
   // Método para insertar una nueva cotización
-  Future<bool> insertarCotizacion(Cotizacion cotizacion, BuildContext context) async {
-    final provider = Provider.of<CotizacionProvider>(context, listen: false);
-    try {
-      provider.loading = true;
-      int idCotizacion = await service.insertarCotizacion(cotizacion);
+Future<bool> insertarCotizacion(Cotizacion cotizacion, BuildContext context) async {
+  final provider = Provider.of<CotizacionProvider>(context, listen: false);
+  
+  provider.loading = true; // Activar el estado de carga
+  
+  try {
+    int idCotizacion = await service.insertarCotizacion(cotizacion);
 
-      if (idCotizacion != -1) {
-        provider.cotizaciones.add(cotizacion); // Agregar la nueva cotización al provider
-        provider.loading = false;
-        sncackbarGlobal('Cotización agregada con éxito.', color: Colors.green);
-        return true;
-      } else {
-        provider.loading = false;
-        sncackbarGlobal('Error al agregar la cotización.', color: Colors.red);
-        return false;
-      }
-    } catch (e) {
-      provider.loading = false;
-      sncackbarGlobal('Error al agregar la cotización.', color: Colors.red);
-      return false;
-    }
+    if (idCotizacion != -1) {
+      sncackbarGlobal('Cotización agregada con éxito.', color: Colors.green);
+      return true;
+    } 
+
+    sncackbarGlobal('Error al agregar la cotización.', color: Colors.red);
+    return false;
+
+  } catch (e) {
+    // Log para depuración
+    sncackbarGlobal('Error al agregar la cotización.', color: Colors.red);
+    return false;
+
+  } finally {
+    provider.loading = false; // Asegurar que loading se desactive siempre
   }
+}
+
 
   // Método para obtener todas las cotizaciones
-  Future<bool> obtenerCotizaciones(BuildContext context) async {
+  Future<bool> obtenerCotizaciones(BuildContext context, DateTime fechaDesde,DateTime fechaHasta) async {
     final provider = Provider.of<CotizacionProvider>(context, listen: false);
+        final clienteProvider =
+        Provider.of<ClientesProvider>(context, listen: false);
     try {
       provider.loading = true;
-      List<Cotizacion> cotizaciones = await service.obtenerTodasLasCotizaciones();
+      List<CotizacionCliente> cotizaciones = await service.obtenerTodasLasCotizaciones(fechaDesde: fechaDesde, fechaHasta: fechaHasta, idCliente: clienteProvider.idClienteSelected);
       provider.cotizaciones = cotizaciones;
       provider.loading = false;
       return true;
@@ -54,10 +62,30 @@ class CotizacionController {
     final provider = Provider.of<CotizacionProvider>(context, listen: false);
     try {
       provider.loading = true;
-      Cotizacion? cotizacion = await service.obtenerCotizacionPorId(idCotizacion);
-      
+      CotizacionCliente? cotizacion = await service.obtenerCotizacionPorId(idCotizacion);
       if (cotizacion != null) {
-        provider.cotizacion = cotizacion;
+        provider.cotizacionCliente = cotizacion;
+        provider.loading = false;
+        return true;
+      } else {
+        provider.loading = false;
+        return false;
+      }
+    } catch (e) {
+      provider.loading = false;
+      provider.cotizacion = null;
+      return false;
+    }
+  }
+  Future<bool> obtenerCotizacionReportePorClienteId(int idCotizacion, BuildContext context) async {
+    final provider = Provider.of<CotizacionProvider>(context, listen: false);
+    print( "idCotizacion");
+    print( idCotizacion);
+    try {
+      provider.loading = true;
+      CotizacionClienteReporte? cotizacion = await service.getCotizacionesReporteByClienteId(idCotizacion);
+      if (cotizacion != null) {
+        provider.cotizacionClienteReporte = cotizacion;
         provider.loading = false;
         return true;
       } else {
@@ -96,28 +124,4 @@ class CotizacionController {
     }
   }
 
-  // Método para eliminar una cotización
-  Future<bool> eliminarCotizacion(int idCotizacion, BuildContext context) async {
-    final provider = Provider.of<CotizacionProvider>(context, listen: false);
-    try {
-      provider.loading = true;
-      int result = await service.eliminarCotizacion(idCotizacion);
-
-      if (result > 0) {
-        // Elimina la cotización de la lista en el provider
-        provider.cotizaciones.removeWhere((cot) => cot.cotizacion.idCotizacion == idCotizacion);
-        sncackbarGlobal('Cotización eliminada con éxito.', color: Colors.green);
-        provider.loading = false;
-        return true;
-      } else {
-        provider.loading = false;
-        sncackbarGlobal('Error al eliminar la cotización.', color: Colors.red);
-        return false;
-      }
-    } catch (e) {
-      provider.loading = false;
-      sncackbarGlobal('Error al eliminar la cotización.', color: Colors.red);
-      return false;
-    }
-  }
 }

@@ -4,18 +4,18 @@
 
 import 'dart:convert';
 
-Cierre cierreFromJson(String str) => Cierre.fromJson(json.decode(str));
+EmpresaInformacion cierreFromJson(String str) => EmpresaInformacion.fromJson(json.decode(str));
 
-String cierreToJson(Cierre data) => json.encode(data.toJson());
+String cierreToJson(EmpresaInformacion data) => json.encode(data.toJson());
 
-class Cierre {
+class EmpresaInformacion {
     Empresa empresa;
 
-    Cierre({
+    EmpresaInformacion({
         required this.empresa,
     });
 
-    factory Cierre.fromJson(Map<String, dynamic> json) => Cierre(
+    factory EmpresaInformacion.fromJson(Map<String, dynamic> json) => EmpresaInformacion(
         empresa: Empresa.fromJson(json["empresa"]),
     );
 

@@ -1,3 +1,7 @@
+// ignore_for_file: avoid_print, unused_local_variable
+
+import 'package:ainso/models/cotizacionCliente.model.dart';
+import 'package:ainso/models/cotizacionClienteReporte.model.dart';
 import 'package:ainso/services/services.dart';
 import '../models/models.dart';
 
@@ -9,8 +13,11 @@ class CotizacionService {
     final db = await database;
 
     try {
-      // Insertar la cotización
-      final idCotizacion = await db.insert('Cotizacion', {
+      // Iniciar una transacción batch
+      var batch = db.batch();
+
+      // Insertar la cotización y obtener el ID
+      int idCotizacion = await db.insert('Cotizacion', {
         'idCliente': cotizacion.cotizacion.idCliente,
         'fecha': cotizacion.cotizacion.fecha.toIso8601String(),
         'total': cotizacion.cotizacion.total,
@@ -21,9 +28,9 @@ class CotizacionService {
         'tipoCotizacion': cotizacion.cotizacion.tipoCotizacion,
       });
 
-      // Insertar los ítems de la cotización
+      // Insertar los ítems de la cotización en el batch
       for (var item in cotizacion.items) {
-        await db.insert('ItemCotizacion', {
+        batch.insert('ItemCotizacion', {
           'idCotizacion': idCotizacion,
           'nombre': item.nombre,
           'precio': item.precio,
@@ -34,24 +41,159 @@ class CotizacionService {
         });
       }
 
-      return idCotizacion; // Retorna el ID de la cotización insertada
+      // Ejecutar la transacción
+      await batch.commit(noResult: true);
+
+      return idCotizacion;
     } catch (e) {
-      // ignore: avoid_print
       print('Error al insertar la cotización: $e');
-      return -1; // En caso de error, retorna -1
+      return -1;
     }
   }
 
   /// Método para obtener una cotización por su ID
-  Future<Cotizacion?> obtenerCotizacionPorId(int idCotizacion) async {
+  Future<CotizacionCliente?> obtenerCotizacionPorId(int idCotizacion) async {
     final db = await database;
 
     try {
-      // Obtener la cotización
-      final cotizacionRes = await db.query('Cotizacion', where: 'idCotizacion = ?', whereArgs: [idCotizacion]);
+      // Consultar la tabla Cotizacion por ID
+      final cotizacionRes = await db.query(
+        'Cotizacion',
+        where: 'idCotizacion = ?',
+        whereArgs: [idCotizacion],
+      );
 
       if (cotizacionRes.isNotEmpty) {
-        var cotizacion = cotizacionRes.first;
+        final cotizacionRow = cotizacionRes.first;
+
+        // Consultar los ítems asociados a esta cotización
+        final itemsRes = await db.query(
+          'ItemCotizacion',
+          where: 'idCotizacion = ?',
+          whereArgs: [idCotizacion],
+        );
+        List<Item> items = itemsRes.map((i) => Item.fromJson(i)).toList();
+
+        // Construir el objeto Cotizacion, que ya contiene la lista de ítems
+        Cotizacion cotizacion = Cotizacion(
+          cotizacion: CotizacionClass.fromJson(cotizacionRow),
+          items: items,
+        );
+
+        // Consultar la información del cliente usando el idCliente de la cotización
+        final clienteRes = await db.query(
+          'Clientes',
+          where: 'idCliente = ?',
+          whereArgs: [cotizacionRow['idCliente']],
+        );
+
+        if (clienteRes.isNotEmpty) {
+          Cliente cliente = Cliente.fromJson(clienteRes.first);
+          // Retornar el wrapper CotizacionCliente con la cotización (que incluye sus ítems)
+          // y el cliente obtenido.
+          return CotizacionCliente(cotizacion: cotizacion, cliente: cliente);
+        }
+      }
+    } catch (e) {
+      print('Error al obtener cotización: $e');
+    }
+    return null;
+  }
+
+  Future<CotizacionClienteReporte?> getCotizacionesReporteByClienteId(int idCliente) async {
+    final db = await database;
+
+    try {
+      // 1️⃣ Obtener la información del cliente
+      final clienteRes = await db.query(
+        'Cli entes',
+        where: 'idCliente = ?',
+        whereArgs: [idCliente],
+      );
+
+      if (clienteRes.isEmpty) return null;
+
+      Cliente cliente = Cliente.fromJson(clienteRes.first);
+
+      // 2️⃣ Obtener todas las cotizaciones del cliente
+      final cotizacionesRes = await db.query(
+        'Cotizacion',
+        where: 'idCliente = ?',
+        whereArgs: [idCliente],
+      );
+
+      if (cotizacionesRes.isEmpty) {
+        return CotizacionClienteReporte(cliente: cliente, cotizaciones: []);
+      }
+
+      List<Cotizacion> cotizaciones = [];
+
+      for (var cotizacionRow in cotizacionesRes) {
+        int idCotizacion = cotizacionRow['idCotizacion'] as int;
+
+        // 3️⃣ Obtener los ítems de esta cotización
+        final itemsRes = await db.query(
+          'ItemCotizacion',
+          where: 'idCotizacion = ?',
+          whereArgs: [idCotizacion],
+        );
+
+        List<Item> items = itemsRes.map((i) => Item.fromJson(i)).toList();
+
+        // 4️⃣ Construir la cotización con sus ítems
+        Cotizacion cotizacion = Cotizacion(
+          cotizacion: CotizacionClass.fromJson(cotizacionRow),
+          items: items,
+        );
+
+        cotizaciones.add(cotizacion);
+      }
+
+      return CotizacionClienteReporte(cliente: cliente, cotizaciones: cotizaciones);
+    } catch (e) {
+      print('Error al obtener cotizaciones del cliente: $e');
+      return null;
+    }
+  }
+  Future<List<CotizacionCliente>> obtenerTodasLasCotizaciones({
+    required DateTime fechaDesde,
+    required DateTime fechaHasta,
+    int? idCliente, // Parámetro opcional; si es 0 se ignora
+  }) async {
+    final db = await database;
+    print(fechaDesde);
+    print(fechaHasta);
+    print(idCliente);
+
+    try {
+      // Convertir las fechas a cadenas en formato 'YYYY-MM-DD'
+      String fechaDesdeStr =
+          "${fechaDesde.year.toString().padLeft(4, '0')}-${fechaDesde.month.toString().padLeft(2, '0')}-${fechaDesde.day.toString().padLeft(2, '0')}";
+      String fechaHastaStr =
+          "${fechaHasta.year.toString().padLeft(4, '0')}-${fechaHasta.month.toString().padLeft(2, '0')}-${fechaHasta.day.toString().padLeft(2, '0')}";
+
+      // Construir la cláusula WHERE
+      String whereClause = 'fecha BETWEEN ? AND ?';
+      List<dynamic> whereArgs = [fechaDesdeStr, fechaHastaStr];
+
+      // Si se proporciona idCliente y es distinto de 0, agregarlo al filtro
+      if (idCliente != null && idCliente != 0) {
+        whereClause += ' AND idCliente = ?';
+        whereArgs.add(idCliente);
+      }
+
+      // Obtener las cotizaciones según la cláusula WHERE
+      final cotizacionesRes = await db.query(
+        'Cotizacion',
+        where: whereClause,
+        whereArgs: whereArgs,
+      );
+
+      List<CotizacionCliente> cotizaciones = [];
+
+      for (var cotizacion in cotizacionesRes) {
+        int idCotizacion =
+            cotizacion['idCotizacion'] as int; // Forzamos el cast a int
 
         // Obtener los ítems de la cotización
         final itemsRes = await db.query(
@@ -61,47 +203,34 @@ class CotizacionService {
         );
         List<Item> items = itemsRes.map((i) => Item.fromJson(i)).toList();
 
-        return Cotizacion(
-          cotizacion: CotizacionClass.fromJson(cotizacion),
-          items: items,
+        // Obtener la información del cliente
+        final clienteRes = await db.query(
+          'Clientes',
+          where: 'idCliente = ?',
+          whereArgs: [cotizacion['idCliente']],
+        );
+
+        Cliente? cliente;
+        if (clienteRes.isNotEmpty) {
+          cliente = Cliente.fromJson(clienteRes.first);
+        }
+
+        // Construir la instancia de Cotizacion y agregarla junto con los ítems y el cliente
+        cotizaciones.add(
+          CotizacionCliente(
+            cotizacion: Cotizacion(
+              cotizacion: CotizacionClass.fromJson(cotizacion),
+              items: items,
+            ),
+            cliente: cliente!, // Aseguramos que el cliente no sea nulo
+          ),
         );
       }
-    // ignore: empty_catches
-    } catch (e) {
-    }
 
-    return null; // Retorna null si no se encuentra la cotización
-  }
-
-  /// Método para obtener todas las cotizaciones
-  Future<List<Cotizacion>> obtenerTodasLasCotizaciones() async {
-    final db = await database;
-
-    try {
-      // Obtener todas las cotizaciones
-      final cotizacionesRes = await db.query('Cotizacion');
-
-      List<Cotizacion> cotizaciones = [];
-
-      for (var cotizacion in cotizacionesRes) {
-        // Para cada cotización, obtenemos sus ítems
-        int idCotizacion = cotizacion['idCotizacion'] as int;
-
-        final itemsRes = await db.query(
-          'ItemCotizacion',
-          where: 'idCotizacion = ?',
-          whereArgs: [idCotizacion],
-        );
-        List<Item> items = itemsRes.map((i) => Item.fromJson(i)).toList();
-
-        cotizaciones.add(Cotizacion(
-          cotizacion: CotizacionClass.fromJson(cotizacion),
-          items: items,
-        ));
-      }
-
+      print(cotizaciones);
       return cotizaciones;
     } catch (e) {
+      print('Error al obtener cotizaciones: $e');
       return []; // Retorna una lista vacía en caso de error
     }
   }
@@ -129,7 +258,11 @@ class CotizacionService {
       );
 
       // Eliminar los ítems anteriores y reinserta los nuevos
-      await db.delete('ItemCotizacion', where: 'idCotizacion = ?', whereArgs: [cotizacion.cotizacion.idCotizacion]);
+      await db.delete(
+        'ItemCotizacion',
+        where: 'idCotizacion = ?',
+        whereArgs: [cotizacion.cotizacion.idCotizacion],
+      );
       for (var item in cotizacion.items) {
         await db.insert('ItemCotizacion', {
           'idCotizacion': cotizacion.cotizacion.idCotizacion,
@@ -154,10 +287,18 @@ class CotizacionService {
 
     try {
       // Eliminar los ítems de la cotización
-      await db.delete('ItemCotizacion', where: 'idCotizacion = ?', whereArgs: [idCotizacion]);
+      await db.delete(
+        'ItemCotizacion',
+        where: 'idCotizacion = ?',
+        whereArgs: [idCotizacion],
+      );
 
       // Eliminar la cotización
-      int count = await db.delete('Cotizacion', where: 'idCotizacion = ?', whereArgs: [idCotizacion]);
+      int count = await db.delete(
+        'Cotizacion',
+        where: 'idCotizacion = ?',
+        whereArgs: [idCotizacion],
+      );
 
       return count; // Retorna la cantidad de filas afectadas
     } catch (e) {

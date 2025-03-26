@@ -1,5 +1,7 @@
+// ignore_for_file: library_private_types_in_public_api, avoid_print
+
 import 'package:ainso/controllers/controller.dart';
-import 'package:ainso/globals/widgets/snackbarglobal.helper.global.dart';
+import 'package:ainso/globals/widgets/widgets.dart';
 import 'package:ainso/models/models.dart';
 import 'package:ainso/providers/providers.dart';
 import 'package:ainso/screens/crearfactura/components/buscarcliente.component.dart';
@@ -8,7 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class CrearCotizacionScreen extends StatefulWidget {
-  const CrearCotizacionScreen({Key? key}) : super(key: key);
+  const CrearCotizacionScreen({super.key});
 
   @override
   _CrearCotizacionScreenState createState() => _CrearCotizacionScreenState();
@@ -16,14 +18,16 @@ class CrearCotizacionScreen extends StatefulWidget {
 
 class _CrearCotizacionScreenState extends State<CrearCotizacionScreen> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController _numeroCotizacionController = TextEditingController();
-  TextEditingController _subtotalController = TextEditingController();
-  TextEditingController _totalController = TextEditingController();
-  TextEditingController _isvController = TextEditingController();
-  List<Map<String, TextEditingController>> _itemsControllers = [];
+  final TextEditingController _numeroCotizacionController = TextEditingController();
+  final TextEditingController _subtotalController = TextEditingController();
+  final TextEditingController _totalController = TextEditingController();
+  final TextEditingController _isvController = TextEditingController();
+  final List<Map<String, TextEditingController>> _itemsControllers = [];
+  
   String tipoSeleccionado = 'Cliente';
   String _tipoPago = 'Contado';
-  String _tipoCotizacion = 'Cotización';
+  String _tipoCotizacion = 'Cotización'; // Valor inicial
+
   double _subtotal = 0.0;
   double _total = 0.0;
   double _isv = 0.0;
@@ -32,7 +36,7 @@ class _CrearCotizacionScreenState extends State<CrearCotizacionScreen> {
   @override
   void initState() {
     super.initState();
-    _agregarItem();  // Agregar el primer ítem
+    _agregarItem(); // Agregar el primer ítem
   }
 
   void _agregarItem() {
@@ -50,6 +54,7 @@ class _CrearCotizacionScreenState extends State<CrearCotizacionScreen> {
 
   void _calcularTotales() {
     double subtotalTemp = 0.0;
+    // Recorremos cada ítem y calculamos su total
     for (var item in _itemsControllers) {
       double precio = double.tryParse(item["precio"]?.text ?? '') ?? 0.0;
       int cantidad = int.tryParse(item["cantidad"]?.text ?? '') ?? 0;
@@ -59,7 +64,7 @@ class _CrearCotizacionScreenState extends State<CrearCotizacionScreen> {
     }
     setState(() {
       _subtotal = subtotalTemp;
-      _total = _subtotal;
+      // Si es Cotización se aplica el 15% de ISV, si es Proforma, ISV es 0
       _isv = _tipoCotizacion == 'Cotización' ? _subtotal * 0.15 : 0.0;
       _total = _subtotal + _isv;
       _subtotalController.text = _subtotal.toStringAsFixed(2);
@@ -69,6 +74,7 @@ class _CrearCotizacionScreenState extends State<CrearCotizacionScreen> {
   }
 
   Future<void> _guardarCotizacion() async {
+            final clientesProvider = Provider.of<ClientesProvider>(context, listen: false);
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
         _isLoading = true;
@@ -77,66 +83,59 @@ class _CrearCotizacionScreenState extends State<CrearCotizacionScreen> {
       // Crear el objeto Cotizacion
       Cotizacion cotizacion = Cotizacion(
         cotizacion: CotizacionClass(
-          idCotizacion: 0, // El ID será generado por la base de datos
-          idCliente: 1, // Aquí deberías obtener el ID del cliente de la base de datos o el controlador
+          idCotizacion: 0, // Se generará en la BD
+          idCliente: clientesProvider.idClienteSelected, // Aquí deberías obtener el ID real del cliente seleccionado
           fecha: DateTime.now(),
-          total: _total.toInt(),
-          subtotal: _subtotal.toInt(),
-          isv: _isv.toInt(),
+          total: _total,
+          subtotal: _subtotal,
+          isv: _isv,
           numeroCotizacion: _numeroCotizacionController.text,
           tipoPago: _tipoPago,
           tipoCotizacion: _tipoCotizacion,
         ),
         items: _itemsControllers.map((item) {
           return Item(
-            idItem: 0, // El ID será generado por la base de datos
-            idCotizacion: 0, // Este será el ID de la cotización generada
+            idItem: 0, // Se genera en la BD
+            idCotizacion: 0, // Se actualizará según la cotización insertada
             nombre: item["nombre"]?.text ?? '',
-            precio: double.tryParse(item["precio"]?.text ?? '') ?? 0.0,
+            precio: double.tryParse(item["precio"]?.text ?? '0') ?? 0.0,
             descripcion: item["descripcion"]?.text ?? '',
-            cantidad: int.tryParse(item["cantidad"]?.text ?? '') ?? 0,
+            cantidad: int.tryParse(item["cantidad"]?.text ?? '0') ?? 0,
             unidad: item["unidad"]?.text ?? '',
-            total: double.tryParse(item["total"]?.text ?? '') ?? 0.0,
+            total: double.tryParse(item["total"]?.text ?? '0') ?? 0.0,
           );
         }).toList(),
       );
 
       // Llamada al controlador para guardar la cotización
-      bool success = await insertarCotizacion(cotizacion, context);
+      bool success = await _insertarCotizacion(cotizacion, context);
+
+      setState(() {
+        _isLoading = false;
+      });
 
       if (success) {
-        setState(() {
-          _isLoading = false;
-        });
+        sncackbarGlobal('Cotización agregada con éxito.', color: Colors.green);
         Navigator.pop(context);
       } else {
-        setState(() {
-          _isLoading = false;
-        });
+        sncackbarGlobal('Error al agregar la cotización.', color: Colors.red);
       }
     }
   }
 
-  Future<bool> insertarCotizacion(Cotizacion cotizacion, BuildContext context) async {
+  Future<bool> _insertarCotizacion(Cotizacion cotizacion, BuildContext context) async {
     final provider = Provider.of<CotizacionProvider>(context, listen: false);
-    try {
-      provider.loading = true;
-      bool idCotizacion = await CotizacionController().insertarCotizacion(cotizacion, context);
 
-      if (idCotizacion != -1) {
-        provider.cotizaciones.add(cotizacion); // Agregar la nueva cotización al provider
-        provider.loading = false;
-        sncackbarGlobal('Cotización agregada con éxito.', color: Colors.green);
-        return true;
-      } else {
-        provider.loading = false;
-        sncackbarGlobal('Error al agregar la cotización.', color: Colors.red);
-        return false;
-      }
+    provider.loading = true;
+
+    try {
+      bool success = await CotizacionController().insertarCotizacion(cotizacion, context);
+      return success;
     } catch (e) {
-      provider.loading = false;
-      sncackbarGlobal('Error al agregar la cotización.', color: Colors.red);
+      print('Error en insertarCotizacion: $e');
       return false;
+    } finally {
+      provider.loading = false;
     }
   }
 
@@ -196,32 +195,24 @@ class _CrearCotizacionScreenState extends State<CrearCotizacionScreen> {
                     ),
                     DropdownButton<String>(
                       value: tipoSeleccionado,
-                      onChanged: (String? newValue) async {
+                      onChanged: (String? newValue) {
                         if (newValue != null) {
                           setState(() {
                             tipoSeleccionado = newValue;
                           });
-                          // Llamar al controlador según el tipo seleccionado
-                          if (tipoSeleccionado == 'Cliente') {
-                            // Aquí se llamaría al controlador de clientes activos
-                          } else {
-                            // Aquí se llamaría al controlador de proveedores activos
-                          }
+                          // Lógica adicional según el tipo seleccionado
                         }
                       },
                       items: <String>['Cliente', 'Proveedor']
                           .map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
-                          child: Text(
-                            value,
-                            style: GoogleFonts.poppins(color: Colors.blue),
-                          ),
+                          child: Text(value, style: GoogleFonts.poppins(color: Colors.blue)),
                         );
                       }).toList(),
                     ),
                     const SizedBox(height: 10),
-                    // Buscador de cliente (se actualiza según el tipo seleccionado)
+                    // Buscador de cliente
                     const Text(
                       'Cliente',
                       style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
@@ -246,16 +237,17 @@ class _CrearCotizacionScreenState extends State<CrearCotizacionScreen> {
                       decoration: InputDecoration(
                         labelText: 'Tipo de Pago',
                         prefixIcon: Icon(Icons.payment, color: Colors.blue),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                       onChanged: (String? newValue) {
-                        setState(() {
-                          _tipoPago = newValue!;
-                        });
+                        if (newValue != null) {
+                          setState(() {
+                            _tipoPago = newValue;
+                          });
+                        }
                       },
-                      items: ['Contado', 'Crédito'].map<DropdownMenuItem<String>>((String value) {
+                      items: ['Contado', 'Crédito']
+                          .map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value, style: GoogleFonts.poppins()),
@@ -263,9 +255,36 @@ class _CrearCotizacionScreenState extends State<CrearCotizacionScreen> {
                       }).toList(),
                     ),
                     const SizedBox(height: 20),
-                    // Agregar ítems
+                    // Tipo de Cotización (Cotización o Proforma)
+                    DropdownButtonFormField<String>(
+                      value: _tipoCotizacion,
+                      decoration: InputDecoration(
+                        labelText: 'Tipo de Cotización',
+                        prefixIcon: Icon(Icons.description, color: Colors.blue),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            _tipoCotizacion = newValue;
+                          });
+                          _calcularTotales(); // Recalcular totales al cambiar
+                        }
+                      },
+                      items: ['Cotización', 'Proforma']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value, style: GoogleFonts.poppins()),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+                    // Lista de ítems con botón de eliminación y total individual
                     const Text('Items', style: TextStyle(fontWeight: FontWeight.bold)),
-                    ..._itemsControllers.map((item) {
+                    ..._itemsControllers.asMap().entries.map((entry) {
+                      int index = entry.key;
+                      Map<String, TextEditingController> item = entry.value;
                       return Card(
                         margin: const EdgeInsets.only(bottom: 10),
                         child: Padding(
@@ -273,6 +292,22 @@ class _CrearCotizacionScreenState extends State<CrearCotizacionScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Encabezado con título y botón de eliminar
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Item ${index + 1}", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () {
+                                      setState(() {
+                                        _itemsControllers.removeAt(index);
+                                        _calcularTotales();
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
                               _buildInputField(
                                 controller: item["nombre"]!,
                                 label: 'Nombre',
@@ -300,29 +335,39 @@ class _CrearCotizacionScreenState extends State<CrearCotizacionScreen> {
                                 label: 'Descripción',
                                 icon: Icons.description,
                               ),
+                              // Mostrar el total calculado para el ítem
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Text(
+                                  "Total del item: ${item["total"]?.text ?? '0'}",
+                                  style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                                ),
+                              ),
                             ],
                           ),
                         ),
                       );
-                    }).toList(),
-                    ElevatedButton(
-                      onPressed: _agregarItem,
-                      child: Text('Agregar Item'),
+                    }),
+                    ButtonXXL(
+                      funcion: _agregarItem,
+                      texto: 'Agregar Item',
                     ),
                     const SizedBox(height: 20),
-                    // Totales
+                    // Totales generales
                     _buildInputField(
                       controller: _subtotalController,
                       label: 'Subtotal',
                       icon: Icons.account_balance_wallet,
                       validator: (value) => value == null || value.isEmpty ? 'Ingrese el subtotal' : null,
                     ),
-                    _buildInputField(
-                      controller: _isvController,
-                      label: 'ISV',
-                      icon: Icons.money,
-                      validator: (value) => value == null || value.isEmpty ? 'Ingrese el ISV' : null,
-                    ),
+                    // Mostrar ISV solo si es Cotización
+                    if (_tipoCotizacion == 'Cotización')
+                      _buildInputField(
+                        controller: _isvController,
+                        label: 'ISV',
+                        icon: Icons.money,
+                        validator: (value) => value == null || value.isEmpty ? 'Ingrese el ISV' : null,
+                      ),
                     _buildInputField(
                       controller: _totalController,
                       label: 'Total',
@@ -330,10 +375,10 @@ class _CrearCotizacionScreenState extends State<CrearCotizacionScreen> {
                       validator: (value) => value == null || value.isEmpty ? 'Ingrese el total' : null,
                     ),
                     const SizedBox(height: 20),
-                    // Botón de guardar
-                    ElevatedButton(
-                      onPressed: _guardarCotizacion,
-                      child: Text('Guardar Cotización', style: GoogleFonts.poppins()),
+                    // Botón de guardar cotización
+                    ButtonXXL(
+                      funcion: () => _guardarCotizacion(),
+                      texto: 'Guardar Cotización',
                     ),
                   ],
                 ),

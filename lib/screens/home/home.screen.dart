@@ -1,5 +1,6 @@
 import 'package:ainso/controllers/clientes.controller.dart';
 import 'package:ainso/screens/crearcotizacion/crearcotizacion.screen.dart';
+import 'package:ainso/screens/filtroCotizacionReporte/filtroCotizacion.screen.dart';
 import 'package:ainso/screens/screens.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -187,10 +188,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Expanded(
                             child: GridItem(
-                              icono: Icons.event,
+                              icono: Icons.edit_document,
                               funcion: () {
+                                // alertMantenimiento(context);
                                 ClientesLocalesController()
                                     .traerClientesLocalesCliente(context);
+
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -198,7 +201,46 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 );
                               },
-                              texto: 'Crear factura',
+                              texto: 'Crear cotización',
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: GridItem(
+                              icono: Icons.contact_support_outlined,
+                              funcion: () {
+                                ClientesLocalesController()
+                                    .traerAllClientesLocales(context);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (_) => const FiltroCotizacionScreen(),
+                                  ),
+                                );
+                              },
+                              texto: 'Consultas',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IntrinsicHeight(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GridItem(
+                              colorContainer: tema.onSecondary,
+                              icono: Icons.picture_as_pdf_outlined,
+                              funcion: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => FiltroCotizacionReporteScreen(),
+                                  ),
+                                );
+                              },
+                              texto: 'Generar reporte cotización',
                             ),
                           ),
                           const SizedBox(width: 10),
